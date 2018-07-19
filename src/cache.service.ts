@@ -345,6 +345,32 @@ export class CacheService {
       );
     });
   }
+  
+  saveOnly<T = any>(
+    key: string,
+    observable: any,
+    groupKey?: string,
+    ttl?: number
+  ): Observable<T> {
+    if (!this.cacheEnabled) return observable;
+
+    observable = observable.pipe(share());
+
+    return defer(() => {
+      return fromPromise(this.getItem(key)).pipe(
+        catchError(e => {
+          observable.subscribe(
+            res => {
+              return this.saveItem(key, res, groupKey, ttl);
+            },
+            error => {
+              return _throw(error);
+            }
+          );
+        })
+      );
+    });
+  }
 
   /**
    * @description Load item from cache if it's in cache or load from origin observable
