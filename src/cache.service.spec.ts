@@ -431,9 +431,32 @@ describe('Observable Caching', () => {
       }
     );
   });
+  
+  it('should return data from observable (async)', (done: any) => {
+    service.saveOnly(key, observable).subscribe(
+      res => {
+        expect(res).toBeDefined();
+        expect(observable.subscribe).toHaveBeenCalled();
+        expect(res).toEqual(mockData);
+        done();
+      },
+      err => {
+        console.info('Error in observable', err);
+        done(err);
+      }
+    );
+  });
 
   it('should return cached observable data (async)', done => {
     service.loadFromObservable(key, observable).subscribe(res => {
+      expect(observable.subscribe).not.toHaveBeenCalled();
+      expect(res).toEqual(mockData);
+      done();
+    });
+  });
+  
+  it('should return cached observable data (async)', done => {
+    service.saveOnly(key, observable).subscribe(res => {
       expect(observable.subscribe).not.toHaveBeenCalled();
       expect(res).toEqual(mockData);
       done();
@@ -483,6 +506,19 @@ describe('Observable caching errors', () => {
 
   it('should return data from observable (async)', (done: any) => {
     service.loadFromObservable(key, observableError).subscribe(
+      res => {
+        expect(true).toBeFalsy();
+        done();
+      },
+      err => {
+        expect(err).toBeDefined();
+        done(err);
+      }
+    );
+  });
+  
+  it('should return data from observable (async)', (done: any) => {
+    service.saveOnly(key, observableError).subscribe(
       res => {
         expect(true).toBeFalsy();
         done();
